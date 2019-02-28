@@ -8,6 +8,10 @@
   Each constructor function has unique properties and methods that are defined in their block comments below:
 */
   
+function getRandomInt(max) {
+  return Math.floor(((Math.random() * Math.floor(max)) * 3) / 2 );
+}
+
 /*
   === GameObject ===
   * createdAt
@@ -15,6 +19,16 @@
   * dimensions (These represent the character's size in the video game)
   * destroy() // prototype method that returns: `${this.name} was removed from the game.`
 */
+function GameObject(object){
+  this.createdAt = object.createdAt;
+  this.name = object.name
+  this.dimensions = object.dimensions;
+}
+
+GameObject.prototype.destroy = function() {
+  console.log(`${this.name} was removed from the game.`);
+  delete this;
+}
 
 /*
   === CharacterStats ===
@@ -22,6 +36,37 @@
   * takeDamage() // prototype method -> returns the string '<object name> took damage.'
   * should inherit destroy() from GameObject's prototype
 */
+
+function CharacterStats(object) {
+  GameObject.call(this, object);
+  this.healthPoints = (object.healthPoints * object.vitality) / 2;
+  this.strength = object.strength;
+  this.vitality = object.vitality;
+  this.dead = false;
+}
+
+CharacterStats.prototype = GameObject.prototype;
+
+CharacterStats.prototype.takeDamage = function(from){
+  let damage = Math.floor((getRandomInt(20) * from.strength) / 2);
+  if (damage == NaN){
+    damage = 2;
+  }
+  console.log(damage);
+  if (this.healthPoints - damage <= 0){
+    console.log(`${this.name} took ${damage} damage from ${from.name} and has died.`);
+    this.dead = true;
+    this.destroy();
+  }else{
+  this.healthPoints -= damage
+  console.log(`${this.name} took ${damage} damage from ${from.name}.`);
+  }
+}
+
+CharacterStats.prototype.attack = function(target) {
+  console.log(`${this.name} has attacked ${target.name}.`);
+  target.takeDamage(this)
+}
 
 /*
   === Humanoid (Having an appearance or character resembling that of a human.) ===
@@ -32,6 +77,19 @@
   * should inherit destroy() from GameObject through CharacterStats
   * should inherit takeDamage() from CharacterStats
 */
+
+function Humanoid(object) {
+  CharacterStats.call(this, object);
+  this.team = object.team;
+  this.weapons = object.weapons;
+  this.language = object.language;
+}
+
+Humanoid.prototype = CharacterStats.prototype;
+
+Humanoid.prototype.greet = function(){
+  return `${this.name} offers a greeting in ${this.language}.`;
+}
  
 /*
   * Inheritance chain: GameObject -> CharacterStats -> Humanoid
@@ -41,7 +99,7 @@
 
 // Test you work by un-commenting these 3 objects and the list of console logs below:
 
-/*
+/* 
   const mage = new Humanoid({
     createdAt: new Date(),
     dimensions: {
@@ -101,10 +159,75 @@
   console.log(archer.language); // Elvish
   console.log(archer.greet()); // Lilith offers a greeting in Elvish.
   console.log(mage.takeDamage()); // Bruce took damage.
-  console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
-*/
+  console.log(swordsman.destroy()); // Sir Mustachio was removed from the game. */
+  function Hero(object) {
+    Humanoid.call(this, object);
+  }
+
+  Hero.prototype = Humanoid.prototype;
+
+  function Villain(object) {
+    Humanoid.call(this, object);
+  }
+
+  Villain.prototype = Humanoid.prototype;
 
   // Stretch task: 
   // * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.  
   // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
   // * Create two new objects, one a villain and one a hero and fight it out with methods!
+
+
+  const mage = new Hero({
+    createdAt: new Date(),
+    dimensions: {
+      length: 2,
+      width: 1,
+      height: 1,
+    },
+    healthPoints: 100,
+    name: 'Bruce',
+    team: 'Mage Guild',
+    weapons: [
+      'Staff of Shamalama',
+    ],
+    language: 'Common Tongue',
+    dead: false,
+    strength: 20,
+    vitality: 20,
+  });
+
+  const swordsman = new Villain({
+    createdAt: new Date(),
+    dimensions: {
+      length: 2,
+      width: 2,
+      height: 2,
+    },
+    healthPoints: 100,
+    name: 'Sir Mustachio',
+    team: 'The Round Table',
+    weapons: [
+      'Giant Sword',
+      'Shield',
+    ],
+    language: 'Common Tongue',
+    dead: false,
+    strength: 20,
+    vitality: 20,
+  });
+
+  console.log(mage.greet());
+  console.log(swordsman.greet());
+  while(true){
+    if(mage.dead || swordsman.dead){
+      break;
+    } else {
+      mage.attack(swordsman);
+    }
+    if(mage.dead || swordsman.dead){
+      break;
+    } else {
+      swordsman.attack(mage);
+    }
+  }
