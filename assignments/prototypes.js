@@ -161,13 +161,13 @@ Humanoid.prototype.greet = function(){
   console.log(mage.takeDamage()); // Bruce took damage.
   console.log(swordsman.destroy()); // Sir Mustachio was removed from the game. */
   function Hero(object) {
-    Humanoid.call(this, object);
+    Humanoid.bind(this, object);
   }
 
   Hero.prototype = Humanoid.prototype;
 
   function Villain(object) {
-    Humanoid.call(this, object);
+    Humanoid.bind(this, object);
   }
 
   Villain.prototype = Humanoid.prototype;
